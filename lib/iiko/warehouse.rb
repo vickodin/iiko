@@ -11,6 +11,7 @@ module Iiko
 
       goods_map = {}
       goods.data.each do |item|
+        next unless ['GOODS', 'DISH', 'PREPARED'].include?(item[gh['TYPE']])
         goods_map[item[gh['NUM']]] = item
       end
 
