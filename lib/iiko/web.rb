@@ -4,13 +4,16 @@ module Iiko
   class Web
     IIKO_USER_AGENT = 'iiko agent'
 
-    attr_reader :agent, :result, :files, :settings, :logged
+    attr_reader :agent, :result, :files, :settings, :logged, :headers
 
     def initialize(settings)
       @settings = settings # :url, :user, :password, :user_agent
       validate_arguments
 
       @agent = Mechanize.new { |agent| agent.user_agent = settings[:user_agent] || IIKO_USER_AGENT }
+
+      #default_headers = { "Accept-Language" => 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4' }
+      #@headers = settings[:headers] ? settings[:headers].merge(default_headers) : default_headers
     end
 
     def login
@@ -41,19 +44,18 @@ module Iiko
     private
 
     def write_file(file_name = nil, name, extension)
-      if file_name
-        File.write(file_name, result.body)
-      else
+      unless file_name
         file = extra_file(name, extension)
-        file.write(result.body)
+        #file.write(result.body)
         file.close
         file_name = file.path
       end
+      File.write(file_name, result.body, mode: 'wb')
       file_name
     end
 
     def extra_file(name, extension)
-      Tempfile.new([name, ".#{extension}"])
+      Tempfile.new([name, ".#{extension}"], encoding: 'ascii-8bit')
     end
 
     def validate_arguments
